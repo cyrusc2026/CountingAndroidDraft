@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         for (String word : cleanWords) {
             wordCount.put(word, wordCount.getOrDefault(word, 0) + 1);
         }
-        wordCount.keySet().removeAll(commonWords);
+        wordCount.keySet().removeAll( commonWords);
         return wordCount;
 
     }
