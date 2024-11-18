@@ -5,7 +5,6 @@ plugins {
 android {
     namespace = "com.example.countingandroiddraft"
     compileSdk = 34
-
     defaultConfig {
         applicationId = "com.example.countingandroiddraft"
         minSdk = 24
@@ -25,10 +24,16 @@ android {
             )
         }
     }
+
+    packagingOptions.exclude("META-INF/DEPENDENCIES")
+    packagingOptions.exclude("META-INF/NOTICE")
+    packagingOptions.exclude("META-INF/LICENSE")
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
 }
 
 dependencies {
@@ -37,8 +42,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation("org.apache.pdfbox:pdfbox:2.0.24")
-    implementation("org.apache.pdfbox:fontbox:2.0.24")
+    implementation(libs.itextg)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
