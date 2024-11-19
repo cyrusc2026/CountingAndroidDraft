@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         output = findViewById(R.id.output);
         output.setText("Please choose an option");
+        //resets the output to default (no option is chosen)
 
         textsSpinnerSetUp(this);
         Spinner modeSelector = findViewById(R.id.modeSelector);
@@ -77,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position > 0) {
+                    //need to check because the first index (0) is the default option when nothing is chosen (" --- Select Mode ---")
                     currentMode = position;
                 }
             }
@@ -97,7 +99,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position > 0) {
                     currentText = position;
+                    //need to check because the first index (0) is the default option when nothing is chosen (" --- Select Text ---")
                     currentTextType = texts.get(currentText).substring(texts.get(currentText).length() - 3);
+                    //gets the last 3 indexes of the String in order to extract the file
                 }
             }
 
@@ -112,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 try {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         modeTriage();
+                        //If "ENTER" is pressed then the algorithm starts to check what mode the user wants and does the methods required
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -130,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 currentTemperatureValue.setText("Value: " + progress);
+                //changes output so that user knows what value is currently
                 temperature = progress;
             }
 
@@ -151,12 +157,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private void textsSpinnerSetUp(Context context) {
+        //The purpose of this method is so that every time the app is launched, it reflects what is currently in the user's Assets folder so that it's much easier to access than whatever is in their downloads (in this situation)
         AssetManager assetManager = context.getAssets();
         try {
             String[] files = assetManager.list("");
             texts.add("-- Select Text --");
+            //adds this in order to create the default option
             for (String file : Objects.requireNonNull(files)) {
                 if (!file.equals("geoid_map") && !file.equals("images") && !file.equals("webkit") && !file.equals("commonWords.txt") && !file.equals("bibleCommonWords.txt")) {
+                    //gets rid of the common words files and the random stuff they may be in the assets folder
                     texts.add(file);
                 }
             }
@@ -176,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         commonWordsInitialisation();
         HashMap<String, Integer> wordsWithCount = cleanWords(words);
         ArrayList<String> sortedWordsWithCount = commonWords(wordsWithCount);
+        //get rids of the common words from the words array because if a word is common then it isn't unqiue
         output.setText("There are "+sortedWordsWithCount.size()+" unique words in the file.");
     }
 
@@ -207,6 +217,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         HashMap<String, Integer> wordsWithCount = cleanWords(words);
         HashMap<Character,Integer> alphabetsWithCount = countAlphabet(wordsWithCount);
         ArrayList<Character> alphabetSorted = alphabetsWithCount.entrySet().stream().sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())).map(Map.Entry::getKey).collect(Collectors.toCollection(ArrayList::new));
+        //need to sort and create new ArrayList because HashMap doesn't store the order
         output.setText("The top 5 alphabets are:\n "
                 +"1. "+alphabetSorted.get(0) + " with "+alphabetsWithCount.get(alphabetSorted.get(0)) + " occurrences\n"
                 +"2. "+alphabetSorted.get(1) + " with "+alphabetsWithCount.get(alphabetSorted.get(1)) + " occurrences\n"
@@ -248,6 +259,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         StringBuilder paragraph = new StringBuilder();
         for (int i = 0; i < 50; i++){
             String temp = sortedWordsWithCount.get(Math.min((int) (random.nextDouble() * ((sortedWordsWithCount.size() * temperature/100.0))), sortedWordsWithCount.size()-1));
+            //what this does is that it prevents possible cases where the randomly generated number is greater than the actual size of the ArrayList
+            //the higher the temperature, the more likely is that words towards the back of the sorted arrayList are picked (more obscure words)
             paragraph.append(temp).append(" ");
         }
         output.setText(paragraph);
@@ -276,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Document document = new Document();
         try {
             PdfWriter.getInstance(document, Files.newOutputStream(new File(this.getFilesDir(),"fileStatistics.pdf").toPath()));
+            //creates a writer to create a file in the user's device
             document.open();
             document.add(new Paragraph("File name: "+texts.get(currentText)));
             document.add(new Paragraph("The total word count is "+words.size()));
@@ -315,6 +329,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 sb.append(line.toLowerCase()).append(" ");
+                //adds everything to one big StringBuilder in order to use .split()
             }
 
         } catch (IOException e) {
@@ -322,6 +337,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
 
         return sb.toString().trim().split("[.!?]\\s*");
+        //splits the String by sentence enders .!?
     }
 
     @SuppressLint("SdCardPath")
@@ -336,6 +352,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             for (int i = 1; i <= reader.getNumberOfPages(); i++) {
                 String pageText = PdfTextExtractor.getTextFromPage(reader, i);
                 if (pageText != null && !pageText.trim().isEmpty()) {
+                    //checks to make sure there is actually content
                     sb.append(pageText);
                 }
             }
@@ -356,6 +373,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         while (scanner.hasNext()) {
             String word = scanner.next();
             splitSentences.add(word);
+            //my attempts to try and split the PDF properly
         }
         return splitSentences.toArray(new String[0]);
     }
@@ -369,6 +387,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             String[] words = sentence.split("[^a-zA-Z'’]+");
             for (String word : words) {
                 if (!word.isEmpty()&&!word.equals("'")&&!word.equals("’")) wordsList.add(word);
+                //checks to remove all non-letters
             }
         }
 
@@ -410,6 +429,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public ArrayList<String> commonWords(HashMap<String, Integer> words){
         ArrayList<String> sortedWords = new ArrayList<>(words.keySet());
         sortedWords.sort((a, b) -> Objects.requireNonNull(words.get(b)).compareTo(Objects.requireNonNull(words.get(a))));
+        //sorts the words
         return sortedWords;
     }
 
@@ -427,6 +447,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 }
             }
         }
+        //takes all the words and counts the individual letters
         return alphabetCount;
     }
 
@@ -442,6 +463,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void modeTriage() throws IOException {
+        //sorts the mode selected to their respected methods
         if (currentMode==1) totalWordCount();
         if (currentMode==2) totalSentenceCount();
         if (currentMode==3) uniqueWords();
