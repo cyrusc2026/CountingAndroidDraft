@@ -189,7 +189,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         commonWordsInitialisation();
         HashMap<String, Integer> wordsWithCount = cleanWords(words);
         ArrayList<String> sortedWordsWithCount = commonWords(wordsWithCount);
-        Log.d("Debug",sortedWordsWithCount.get(0));
         output.setText("The top 5 words are:\n "
                 +"1. "+sortedWordsWithCount.get(0) + " with "+wordsWithCount.get(sortedWordsWithCount.get(0)) + " occurrences\n"
                 +"2. "+sortedWordsWithCount.get(1) + " with "+wordsWithCount.get(sortedWordsWithCount.get(1)) + " occurrences\n"
@@ -218,14 +217,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @SuppressLint("SetTextI18n")
     private void totalWordCount() {
-        Log.d("Debug", "Current Text Type: " + currentTextType);
         String[] sentences = new String[0];
         if (currentTextType.equals("pdf"))
             sentences = pdfToSentenceArray(this, texts.get(currentText));
         if (currentTextType.equals("txt")) sentences = txtToSentenceArray(texts.get(currentText));
-        Log.d("Debug", "Sentences Count: " + sentences.length);
         ArrayList<String> words = sentenceToWord(sentences);
-        Log.d("Debug", "Words Count: " + words.size());
         output.setText("The total word count is " + words.size() + ".");
     }
 
@@ -248,14 +244,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         commonWordsInitialisation();
         HashMap<String, Integer> wordsWithCount = cleanWords(words);
         ArrayList<String> sortedWordsWithCount = commonWords(wordsWithCount);
-        Log.d("Debug","Base ArrayList prepped");
         Random random = new Random();
-        Log.d("Debug","Random initialised");
         StringBuilder paragraph = new StringBuilder();
         for (int i = 0; i < 50; i++){
             String temp = sortedWordsWithCount.get(Math.min((int) (random.nextDouble() * ((sortedWordsWithCount.size() * temperature/100.0))), sortedWordsWithCount.size()-1));
             paragraph.append(temp).append(" ");
-            Log.d("Debug","Word " +i+": ");
         }
         output.setText(paragraph);
     }
@@ -274,16 +267,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         HashMap<Character,Integer> alphabetsWithCount = countAlphabet(wordsWithCount);
         ArrayList<Character> alphabetSorted = alphabetsWithCount.entrySet().stream().sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())).map(Map.Entry::getKey).collect(Collectors.toCollection(ArrayList::new));
         Random random = new Random();
-        Log.d("Debug","Random initialised");
         StringBuilder paragraph = new StringBuilder();
         for (int i = 0; i < 50; i++){
             String temp = sortedWordsWithCount.get(Math.min((int) (random.nextDouble() * ((sortedWordsWithCount.size() * temperature/100.0))), sortedWordsWithCount.size()-1));
             paragraph.append(temp).append(" ");
-            Log.d("Debug","Word " +i+": ");
         }
 
         Document document = new Document();
-        Log.d("Debug", String.valueOf(this.getFilesDir()));
         try {
             PdfWriter.getInstance(document, Files.newOutputStream(new File(this.getFilesDir(),"fileStatistics.pdf").toPath()));
             document.open();
@@ -412,7 +402,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             //noinspection DataFlowIssue
             wordCount.put(word, wordCount.getOrDefault(word, 0) + 1);
         }
-        wordCount.keySet().removeAll( commonWords);
+        wordCount.keySet().removeAll(commonWords);
         return wordCount;
 
     }
